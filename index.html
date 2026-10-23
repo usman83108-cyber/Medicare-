@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0c3428">
+  <title>MediCare+ — Your Personal Medicine Companion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/"><span class="brand-icon">✚</span><span>MediCare<span class="plus">+</span><small>Your personal medicine companion</small></span></a>
+  <nav><a href="#dashboard">Dashboard</a><a href="#medicines">My medicines</a><a href="#prescriptions">Prescriptions</a></nav>
+  <a class="top-cta" href="#medicines">Manage medicines ↗</a>
+</header>
+<main>
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="eyebrow"><span class="pulse"></span> CARE THAT FITS YOUR DAY</span>
+      <h1>Never miss a dose.<br><em>Feel more in control.</em></h1>
+      <p>Keep your medicine schedule, pill stock and prescription records in one simple place, designed with patients and caregivers in mind.</p>
+      <div class="hero-actions"><a class="button primary" href="#medicines">Add a medicine <span>＋</span></a><a class="text-link" href="#how-it-works">Explore features ↘</a></div>
+      <div class="trust-line"><span>✓</span> Simple tracking <span>✓</span> Accessible design <span>✓</span> User-controlled records</div>
+    </div>
+    <div class="hero-art" aria-label="Medicine reminder illustration">
+      <div class="orb orb-one"></div><div class="orb orb-two"></div>
+      <div class="phone">
+        <div class="phone-head"><span>Today’s plan</span><span class="dots">•••</span></div>
+        <div class="date-chip">YOUR DAILY ROUTINE</div>
+        <div class="mini-dose"><span class="pill-icon">✚</span><div><b>Morning medicine</b><small>As prescribed</small></div><span class="check">✓</span></div>
+        <div class="mini-dose highlighted"><span class="pill-icon">◒</span><div><b>Afternoon dose</b><small>Check your schedule</small></div><span class="clock">◷</span></div>
+        <div class="mini-dose"><span class="pill-icon">✦</span><div><b>Evening medicine</b><small>As prescribed</small></div><span class="muted-check">○</span></div>
+        <div class="phone-foot"><span>✚</span> One small step at a time</div>
+      </div>
+      <div class="floating-card stock-card"><span class="float-icon">▤</span><div><small>MEDICINE STOCK</small><b>Stay prepared</b><p>Low-stock reminders</p></div></div>
+      <div class="floating-card care-card"><span class="float-icon heart">♡</span><div><small>MADE FOR CARE</small><b>People first</b><p>Patients & caregivers</p></div></div>
+    </div>
+  </section>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}<div class="flash-wrap">{% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+  {% endwith %}
+
+  <section class="stats" id="dashboard">
+    <div class="stat"><span class="stat-icon">▦</span><div><small>MEDICINES TRACKED</small><strong>{{ medicines|length }}</strong><p>Your current list</p></div></div>
+    <div class="stat"><span class="stat-icon green">◷</span><div><small>ADHERENCE SNAPSHOT</small><strong>{{ adherence }}<sup>%</sup></strong><p>Based on today's logged doses</p></div></div>
+    <div class="stat"><span class="stat-icon amber">!</span><div><small>LOW STOCK</small><strong>{{ low_stock|length }}</strong><p>7 pills or fewer remaining</p></div></div>
+    <div class="stat"><span class="stat-icon violet">♡</span><div><small>CARE, SIMPLIFIED</small><strong>One place</strong><p>Medicine and record tracking</p></div></div>
+  </section>
+
+  <section class="section" id="how-it-works">
+    <div class="section-heading"><div><span class="eyebrow">YOUR CARE TOOLKIT</span><h2>Three helpful tools. <em>One calmer routine.</em></h2></div><p>Start with simple tracking. Advanced notifications and integrations can be added after they are configured and tested.</p></div>
+    <div class="feature-grid">
+      <article class="feature"><div class="feature-icon mint">◷</div><h3>Smart reminder routine</h3><p>Organize medicines by schedule and log doses as taken. Browser alerts can be added as a next step.</p><a href="#medicines">Manage routine ↗</a></article>
+      <article class="feature"><div class="feature-icon peach">▤</div><h3>Stock awareness</h3><p>Keep an estimated pill count and spot low stock before it becomes an unexpected gap.</p><a href="#medicines">Check stock ↗</a></article>
+      <article class="feature"><div class="feature-icon lavender">▧</div><h3>Prescription records</h3><p>Store a prescription file and notes for reference. Always confirm extracted or handwritten instructions with a professional.</p><a href="#prescriptions">Open records ↗</a></article>
+    </div>
+  </section>
+
+  <section class="workspace" id="medicines">
+    <div class="section-heading"><div><span class="eyebrow">PERSONAL MEDICINE LIST</span><h2>Your medicines</h2></div><span class="private-label">● Demo-ready tracker</span></div>
+    <div class="workspace-grid">
+      <div class="panel medicine-panel">
+        <div class="panel-title"><div><h3>Current schedule</h3><p>Use the directions provided by your clinician.</p></div><span class="round-icon">✚</span></div>
+        {% if medicines %}
+          <div class="medicine-list">
+          {% for medicine in medicines %}
+            <article class="medicine-row">
+              <div class="med-symbol">✚</div><div class="med-info"><b>{{ medicine.name }}</b><span>{{ medicine.dosage }} · {{ medicine.schedule }}</span><small class="{% if medicine.remaining <= 7 %}warning-text{% endif %}">{{ medicine.remaining }} pills remaining{% if medicine.remaining <= 7 %} · Low stock{% endif %}</small></div>
+              <div class="med-actions"><form method="post" action="{{ url_for('mark_taken', medicine_id=medicine.id) }}"><button class="button small primary" type="submit">✓ Taken</button></form><form method="post" action="{{ url_for('delete_medicine', medicine_id=medicine.id) }}" onsubmit="return confirm('Remove this medicine and its dose history?')"><button class="icon-button" aria-label="Delete medicine" title="Delete medicine" type="submit">×</button></form></div>
+            </article>
+          {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-state"><span>✚</span><b>No medicines added yet</b><p>Add a medicine using the form to begin your tracker.</p></div>
+        {% endif %}
+        <div class="panel-subtitle"><h3>Recent dose activity</h3></div>
+        {% if logs %}<div class="log-list">{% for log in logs %}<div class="log-row"><span class="log-check">✓</span><span><b>{{ log.medicine_name }}</b><small>{{ log.taken_date }} at {{ log.taken_time }}</small></span><span class="log-status">Logged</span></div>{% endfor %}</div>{% else %}<p class="muted">Your dose activity will appear here after you log a dose.</p>{% endif %}
+      </div>
+      <aside class="panel add-panel">
+        <div class="panel-title"><div><h3>Add a medicine</h3><p>Enter the details from your prescription.</p></div></div>
+        <form method="post" action="{{ url_for('add_medicine') }}" class="form-stack">
+          <label>Medicine name<input name="name" maxlength="100" placeholder="e.g. Medicine name" required></label>
+          <label>Dosage / instructions<input name="dosage" maxlength="100" placeholder="e.g. As prescribed" required></label>
+          <label>Schedule<input name="schedule" maxlength="100" placeholder="e.g. Morning after food" required></label>
+          <label>Estimated pills remaining<input name="remaining" type="number" min="0" max="100000" value="30" required></label>
+          <button class="button primary full" type="submit">Save medicine <span>＋</span></button>
+        </form>
+        <div class="safety-note"><span>ⓘ</span><p>MediCare+ is a tracking prototype, not a medical device. It does not recommend doses or tell you to change treatment.</p></div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section prescription-section" id="prescriptions">
+    <div class="section-heading"><div><span class="eyebrow">KEEP RECORDS TOGETHER</span><h2>Prescription vault</h2></div><p>Upload an image or PDF to store it with a note. This first version does not automatically read or verify prescription text.</p></div>
+    <div class="workspace-grid">
+      <div class="panel add-panel">
+        <div class="panel-title"><div><h3>Upload prescription</h3><p>Accepted: PNG, JPG, WEBP or PDF · Max 8 MB</p></div><span class="round-icon">▧</span></div>
+        <form method="post" action="{{ url_for('upload_prescription') }}" enctype="multipart/form-data" class="form-stack">
+          <label>Choose file<input type="file" name="prescription" accept=".png,.jpg,.jpeg,.webp,.pdf" required></label>
+          <label>Notes (optional)<textarea name="notes" rows="3" maxlength="500" placeholder="e.g. Prescription date or questions for pharmacist"></textarea></label>
+          <button class="button primary full" type="submit">Save prescription ↗</button>
+        </form>
+      </div>
+      <div class="panel">
+        <div class="panel-title"><div><h3>Saved records</h3><p>Only upload records you are authorized to store.</p></div></div>
+        {% if prescriptions %}<div class="record-list">{% for item in prescriptions %}<div class="record-row"><span class="record-icon">▧</span><div class="record-info"><b>{{ item.original_name }}</b><small>{{ item.uploaded_at[:16].replace('T',' ') }}</small>{% if item.notes %}<p>{{ item.notes }}</p>{% endif %}</div><div class="record-actions"><a class="icon-button download" href="{{ url_for('download_prescription', prescription_id=item.id) }}" title="Download" aria-label="Download">↓</a><form method="post" action="{{ url_for('delete_prescription', prescription_id=item.id) }}" onsubmit="return confirm('Permanently delete this record?')"><button class="icon-button" type="submit" title="Delete" aria-label="Delete">×</button></form></div></div>{% endfor %}</div>{% else %}<div class="empty-state compact"><span>▧</span><b>No records saved</b><p>Uploaded prescriptions will appear here.</p></div>{% endif %}
+      </div>
+    </div>
+  </section>
+
+  <section class="closing"><div class="closing-mark">✚</div><div><span class="eyebrow">BECAUSE EVERY DOSE MATTERS</span><h2>Care should feel <em>simpler.</em></h2><p>Built around clarity, consent and everyday routines.</p></div><a href="#dashboard" class="button light">Back to dashboard ↑</a></section>
+</main>
+<footer><a class="brand footer-brand" href="/"><span class="brand-icon">✚</span><span>MediCare<span class="plus">+</span><small>Your personal medicine companion</small></span></a><p>Healthcare support prototype · Not a substitute for professional medical advice.</p><span>© <span id="year"></span> MediCare+</span></footer>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
